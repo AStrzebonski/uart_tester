@@ -1,7 +1,6 @@
 import serial
 import atexit
 import time
-import os
 
 RANDOM_MESSAGE = "sfsgafdgethtegrfwefoqoeqwjdjoiadjowqdjiqwdjpqwdjqwpjdqjpidjpxpwqjpdqpjedjpqdjpqwdpjqdpj"
 
