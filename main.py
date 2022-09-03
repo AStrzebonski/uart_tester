@@ -1,11 +1,12 @@
 import serial
 import atexit
 import time
+import os
 
+RANDOM_MESSAGE = "sfsgafdgethtegrfwefoqoeqwjdjoiadjowqdjiqwdjpqwdjqwpjdqjpidjpxpwqjpdqpjedjpqdjpqwdpjqdpj"
 
 def exit_handler(ser: serial.serialwin32.Serial):
     ser.close()
-
 
 def serial_init(rate: int, port: str):
     ser = serial.Serial()
@@ -21,17 +22,17 @@ def serial_init(rate: int, port: str):
     atexit.register(exit_handler, ser=ser)
     return ser
 
-
 def serial_write(ser: serial.serialwin32.Serial, bytes):
     term = '\n'
     ser.write(bytes)
+    print("wrote: " + str(bytes))
     ser.write(term.encode())
+    print("wrote: " + str(term.encode()))
 
-
-
-def read_data(ser: serial.serialwin32.Serial, len: int):
-    return ser.read(len)
-
+def serial_read(ser: serial.serialwin32.Serial, length):
+    ret = ser.read(length)
+    print("received: " + str(ret))
+    return ret
 
 def compare_data(data1, data2):
     if data1 == data2:
@@ -45,33 +46,32 @@ def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
     msg = "change baudrate to {}".format(speed).encode()
     serial_write(ser, msg)
 
+def testcase_run(ser: serial.serialwin32.Serial, length):
+    bytes_send = RANDOM_MESSAGE[:length].encode()
+
+    serial_write(ser, bytes_send)
+
+    bytes_recv = serial_read(ser, length)
+
+    return compare_data(bytes_send, bytes_recv)
+
 
 def main():
     port = 'COM10'
-    speed = 115200
-    ser = serial_init(speed, port)
+    speed = [115200, 9600, 57600]
+    length = 32
 
-    bytes_send = "dupa".encode()
-    serial_write(ser, bytes_send)
+    for i in range(len(speed)):
+        ser = serial_init(speed[i], port)
 
-    bytes_recv = read_data(ser, len(bytes_send))
-    if compare_data(bytes_send, bytes_recv) == False:
-        return -1
+        testcase_run(ser, length)
 
-    speed = 230400
-    change_baudrate_serial_write(ser, speed)
-    ser.close()
+        if i < len(speed) - 1:
+            change_baudrate_serial_write(ser, speed[i + 1])
 
-    time.sleep(5)
+        ser.close()
 
-    ser = serial_init(speed, port)
-
-    bytes_send = "banan".encode()
-    serial_write(ser, bytes_send)
-
-    bytes_recv = read_data(ser, len(bytes_send))
-    if compare_data(bytes_send, bytes_recv) == False:
-        return -1
+        time.sleep(3)
 
 
 if __name__ == "__main__":
