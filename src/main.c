@@ -7,7 +7,6 @@
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 
 #define MSG_SIZE 32
-#define CHANGE_BAUD_MSG "change baudrate to "
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 static struct uart_config cfg;
@@ -35,6 +34,11 @@ int uart_poll(char *data)
 void uart_write(char data)
 {
 	uart_poll_out(uart_dev, data);
+}
+
+void delay(int msec)
+{
+	k_sleep(K_MSEC(msec));
 }
 
 
@@ -74,13 +78,13 @@ void main(void)
 				/* Terminate string */
 				msg_buf[msg_buf_pos] = '\0';
 
-				if (!strncmp(msg_buf, CHANGE_BAUD_MSG, strlen(CHANGE_BAUD_MSG))) {
-					int rate = atoi(&msg_buf[strlen(CHANGE_BAUD_MSG)]);
-					if (rate == 0) {
-						print_uart("ERROR: received incorrect baudrate\r\n");
-						return;
-					}
-
+				/* The message starting with numbers indicate that the rate change
+				 * is expected. "ACK" message is returned.
+				 */
+				int rate = atoi(msg_buf);
+				if (rate != 0) {
+					print_uart("ACK");
+					delay(1000);
 					uart_set_baud_rate(rate);
 				} else {
 					print_uart(msg_buf);

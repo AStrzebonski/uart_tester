@@ -27,7 +27,6 @@ def serial_write(ser: serial.serialwin32.Serial, bytes):
     ser.write(bytes)
     print("wrote: " + str(bytes))
     ser.write(term.encode())
-    print("wrote: " + str(term.encode()))
 
 def serial_read(ser: serial.serialwin32.Serial, length):
     ret = ser.read(length)
@@ -43,8 +42,14 @@ def compare_data(data1, data2):
         return False
 
 def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
-    msg = "change baudrate to {}".format(speed).encode()
+    ACK_MSG = "ACK"
+
+    msg = str(speed).encode()
     serial_write(ser, msg)
+
+    bytes_recv = serial_read(ser, len(ACK_MSG))
+    if bytes_recv.decode() != ACK_MSG:
+        print("FAIL: unable to change baudrate on device")
 
 def testcase_run(ser: serial.serialwin32.Serial, length):
     bytes_send = RANDOM_MESSAGE[:length].encode()
