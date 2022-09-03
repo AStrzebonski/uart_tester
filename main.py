@@ -1,8 +1,14 @@
 import serial
 import atexit
 import time
+import random
+import string
 
-RANDOM_MESSAGE = "sfsgafdgethtegrfwefoqoeqwjdjoiadjowqdjiqwdjpqwdjqwpjdqjpidjpxpwqjpdqpjedjpqdjpqwdpjqdpj"
+def get_random_string(length):
+    # choose from all lowercase letter
+    letters = string.ascii_letters
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
 
 def exit_handler(ser: serial.serialwin32.Serial):
     ser.close()
@@ -51,7 +57,7 @@ def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
         print("FAIL: unable to change baudrate on device")
 
 def testcase_run(ser: serial.serialwin32.Serial, length):
-    bytes_send = RANDOM_MESSAGE[:length].encode()
+    bytes_send = get_random_string(length).encode()
 
     serial_write(ser, bytes_send)
 
