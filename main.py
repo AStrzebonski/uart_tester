@@ -17,7 +17,7 @@ def serial_init(rate: int, port: str):
     ser = serial.Serial()
     ser.baudrate = rate
     ser.port = port
-    ser.timeout = 10
+    ser.timeout = 5
     ser.parity = serial.PARITY_NONE
     ser.stopbits = serial.STOPBITS_ONE
     ser.bytesize = serial.EIGHTBITS
@@ -43,7 +43,12 @@ def compare_data(data1, data2):
         print("Testcase SUCCESS")
         return True
     else:
-        print("Testcase FAIL")
+        lost_frames = len(data1) - len(data2)
+        bad_frames = 0
+        for _a, _b in zip(data1, data2):
+            if _a != _b:
+                bad_frames += 1
+        print("Testcase FAIL, lost frames: ", lost_frames, ', bad frames: ', bad_frames)
         return False
 
 def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
@@ -67,7 +72,7 @@ def testcase_run(ser: serial.serialwin32.Serial, length):
 
 
 def main():
-    port = 'COM10'
+    port = 'COM5'
     speed = [115200, 9600, 57600]
     length = 32
 
