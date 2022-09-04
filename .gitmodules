@@ -1,0 +1,3 @@
+[submodule "hw/prmcu"]
+	path = hw/prmcu
+	url = git@github.com:Radecki226/prmcu.git
