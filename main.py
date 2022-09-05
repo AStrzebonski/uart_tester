@@ -93,6 +93,7 @@ def main():
     ser = serial_init(115200, port)
     change_baudrate_serial_write(ser, speed[0])
     ser.close()
+    time.sleep(3)
     for i in range(len(speed)):
 
         ser = serial_init(speed[i], port)
