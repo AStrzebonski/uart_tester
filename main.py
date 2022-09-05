@@ -17,7 +17,7 @@ def serial_init(rate: int, port: str):
     ser = serial.Serial()
     ser.baudrate = rate
     ser.port = port
-    ser.timeout = 5
+    ser.timeout = 3
     ser.parity = serial.PARITY_NONE
     ser.stopbits = serial.STOPBITS_ONE
     ser.bytesize = serial.EIGHTBITS
@@ -39,16 +39,19 @@ def serial_read(ser: serial.serialwin32.Serial, length):
     return ret
 
 def compare_data(data1, data2):
+    lost_frames = len(data1) - len(data2)
+    bad_frames = 0
+    for _a, _b in zip(data1, data2):
+        if _a != _b:
+            bad_frames += 1
+    print("lost frames:", lost_frames)
+    print("bad frames:", bad_frames)
+
     if data1 == data2:
         print("Testcase SUCCESS")
         return True
     else:
-        lost_frames = len(data1) - len(data2)
-        bad_frames = 0
-        for _a, _b in zip(data1, data2):
-            if _a != _b:
-                bad_frames += 1
-        print("Testcase FAIL, lost frames: ", lost_frames, ', bad frames: ', bad_frames)
+        print("Testcase FAIL")
         return False
 
 def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
@@ -62,6 +65,7 @@ def change_baudrate_serial_write(ser: serial.serialwin32.Serial, speed):
         print("FAIL: unable to change baudrate on device")
 
 def testcase_run(ser: serial.serialwin32.Serial, length):
+    ser.reset_input_buffer()
     bytes_send = get_random_string(length).encode()
 
     serial_write(ser, bytes_send)
@@ -72,17 +76,27 @@ def testcase_run(ser: serial.serialwin32.Serial, length):
 
 
 def main():
-    port = 'COM5'
-    speed = [115200, 9600, 57600]
-    length = 32
+    # Teststand input:
+    params = list(map(str, input().split(',')))
+    port = str(params[0])
+    print("Port:", port)
+    speed = [115200, int(params[1])]
+    print("Speed:", speed)
+    length = int(params[2])
+    print("Length:", length)
+
+    # No teststand input
+    # port = 'COM5'
+    # speed = [115200, 9600, 57600]
+    # length = 32
 
     for i in range(len(speed)):
         ser = serial_init(speed[i], port)
 
-        testcase_run(ser, length)
-
         if i < len(speed) - 1:
             change_baudrate_serial_write(ser, speed[i + 1])
+
+        testcase_run(ser, length)
 
         ser.close()
 
