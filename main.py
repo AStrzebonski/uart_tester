@@ -92,8 +92,10 @@ def main():
 
     ser = serial_init(115200, port)
     change_baudrate_serial_write(ser, speed[0])
+    ser.close()
     for i in range(len(speed)):
 
+        ser = serial_init(speed[i], port)
         testcase_run(ser, length)
 
         if i < len(speed) - 1:
@@ -101,6 +103,9 @@ def main():
 
         time.sleep(3)
 
+        ser.close()
+    ser = serial_init(speed[-1], port)
+    change_baudrate_serial_write(ser, 115200)
     ser.close()
 
 if __name__ == "__main__":
