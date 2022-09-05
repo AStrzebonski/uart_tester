@@ -80,7 +80,7 @@ def main():
     params = list(map(str, input().split(',')))
     port = str(params[0])
     print("Port:", port)
-    speed = [115200, int(params[1])]
+    speed = [int(params[1])]
     print("Speed:", speed)
     length = int(params[2])
     print("Length:", length)
@@ -90,18 +90,18 @@ def main():
     # speed = [115200, 9600, 57600]
     # length = 32
 
+    ser = serial_init(115200, port)
+    change_baudrate_serial_write(ser, speed[0])
     for i in range(len(speed)):
-        ser = serial_init(speed[i], port)
+
+        testcase_run(ser, length)
 
         if i < len(speed) - 1:
             change_baudrate_serial_write(ser, speed[i + 1])
 
-        testcase_run(ser, length)
-
-        ser.close()
-
         time.sleep(3)
 
+    ser.close()
 
 if __name__ == "__main__":
     main()
