@@ -1,3 +1,9 @@
+-- Piotr Radecki 2022
+
+-- Module for bonding prmcu_uart to nios II microprocessor.
+-- Use this module with following avalon config: Read delay = 1 tick, Write delay = 0 ticks.
+-- Important: Every change in control register resets uart and clears fifos!!
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -60,9 +66,28 @@ architecture rtl of reg32 is
   signal ADDR_TX_REG : std_logic_vector(AWIDTH-1 downto 0) := "10";
   signal ADDR_RX_REG : std_logic_vector(AWIDTH-1 downto 0) := "11";
 
+  -- CONTROL_REG:
+  -- 31 downto 16: Clock divider as unsigned integer
+  -- 13 downto 10: Number of data bits
+  -- 9: Extra stop bit
+  -- 8: Parity bit
+  -- 2: rx_enable
+  -- 1: tx_enable
+  -- 0: uart_enable (Recommended to use either "000" or "111")
   signal CONTROL_REG : std_logic_vector(DWIDTH-1 downto 0);
+
+  -- STATUS_REG(read only):
+  -- 31: rx_vld(new data in fifo)
+  -- 30 downto 8: zeros
+  -- 8 dowtno 0: 0x1A (Can be connected to for example diodes and serve as indicator)
   signal STATUS_REG : std_logic_vector(DWIDTH-1 downto 0);
+
+  -- TX_REG
+  -- 8 downto 0: Data to be sent
   signal TX_REG : std_logic_vector(DWIDTH-1 downto 0);
+
+  -- RX_REG
+  -- 8 downto 0: Received data
   signal RX_REG : std_logic_vector(DWIDTH-1 downto 0) := (others => '0');
 
   signal tx_vld_r : std_logic;
@@ -74,23 +99,6 @@ architecture rtl of reg32 is
   signal readdata_r : std_logic_vector(DWIDTH-1 downto 0);
   signal read_r : std_logic;
 
-
---  function assign_bytewise(
---     input      : std_logic_vector;
---     output     : std_logic_vector;
---	 byteenable : std_logic_vector)
---	 return std_logic_vector is
---	 variable ret : std_logic_vector(DWIDTH-1 downto 0) := output;
---  begin
---
---	   for i in 0 to DBYTES-1 loop
---		  if byteenable(i) = '1' then
---		    ret((i+1)*8-1 downto i*8) := input((i+1)*8-1 downto i*8);
---		  end if;
---		end loop;
---	 return ret;
---
---  end function;
 
   function map_stop_bits(
     reg : std_logic)
