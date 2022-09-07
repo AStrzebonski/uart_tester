@@ -86,9 +86,9 @@ def main():
     print("Length:", length)
 
     # No teststand input
-    # port = 'COM5'
-    # speed = [115200, 9600, 57600]
-    # length = 32
+    #port = 'COM4'
+    #speed = [115200, 1843200]
+    #length = 32
 
     ser = serial_init(115200, port)
     change_baudrate_serial_write(ser, speed[0])
